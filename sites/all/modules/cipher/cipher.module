@@ -103,6 +103,11 @@ function cipher_form_submit($form, &$form_state) {
 
 // Take user to success page and return something
 function cipher_success() {
-    $output = $_SESSION['encoded_message'];
-    return "Your encoded message is: <b>$output</b>";
+    if (!empty($_SESSION)) {
+        $encoded_message =  $_SESSION['encoded_message'];
+        $output = "Your encoded message is: <b>$encoded_message</b>";
+    } else {
+        $output = "<h1>Something went wrong, try again!</h1>";
+    }
+    return $output;
 }
