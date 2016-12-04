@@ -1,22 +1,23 @@
 <?php
+// Set up
 function cipher_menu() {
-    $items = array();
     $items['cipher'] = array(
         'title' => 'Cipher Game',
         'page callback' => 'drupal_get_form',
-        'page argument' => array('cipher_form'),
+        'page arguments' => array('cipher_form'),
         'access callback' => TRUE,
         'type' => MENU_NORMAL_ITEM,
     );
     $items['cipher_success_page'] = array(
         'title' => 'Success',
-       'page callback' => 'cipher_success',
-       'access callback' => TRUE,
-       'type' => MENU_CALLBACK,
+        'page callback' => 'cipher_success',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
    );
    return $items;
 }
 
+// Build the form
 function cipher_form() {
     $form['message'] = array(
         '#title' => 'Enter a sentence',
@@ -34,7 +35,7 @@ function cipher_form() {
         '#title' => 'Enter a number',
         '#type' => 'textfield',
         '#required' => TRUE,
-        '#element_validate' => array('element_validate_integer_positive', 'element_validate_number_range'),
+        '#element_validate' => array('element_validate_integer_positive'),
     );
     $form['submit'] = array(
         '#type' => 'submit',
@@ -43,18 +44,37 @@ function cipher_form() {
     return $form;
 }
 
+// Validate Inputs
+function element_validate_sentence($element) {
+    $valid_inputs = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '!', ',', '.', '?', '"', '""', '(', ')', '/', ';', ':', '!', ' ');
+    $letters = str_split(strtolower($element['#value']));
+    foreach($letters as $letter) {
+        if (in_array($letter, $valid_inputs) == false) {
+            form_error($element, t('That is not a valid input, try again!'));
+        }
+    }
+}
+
+function element_validate_direction($element) {
+    $valid_inputs = array('right', 'left');
+    $direction_input = strtolower($element['#value']);
+    if(in_array($direction_input, $valid_inputs) == false) {
+        form_error($element, t('Please enter either "Left" or "Right."'));
+    }
+}
+
+// Do something with user inputs
 function cipher_form_submit($form, &$form_state) {
-    $message = strtolower($form_state['values']['sentence']);
+    $message = strtolower($form_state['values']['message']);
     $direction = strtolower($form_state['values']['direction']);
     $number_of_moves = $form_state['values']['number_of_moves'];
     $letter_array = str_split($message);
     $encoded_message = array();
 
     $alphabet =  array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
-    //$punctuation = array('!', ',', '.', '?', '"', '""', '(', ')', '/', ';', ':');
     foreach ($letter_array as $letter) {
     	if (in_array($letter, $alphabet)) {
-    		if ($direction === "right") {
+    		if ($direction == "right") {
     			$index = array_search($letter, $alphabet) + $number_of_moves;
     			if($index > count($alphabet)) {
     				$index = $index % count($alphabet);
@@ -62,7 +82,7 @@ function cipher_form_submit($form, &$form_state) {
     			} else {
     				array_push($encoded_message, $alphabet[$index]);
     			}
-    		} elseif ($direction === "left") {
+    		} elseif ($direction == "left") {
     			$reversed_alphabet_array = array_reverse($alphabet);
     			$letter_index = array_search($letter, $reversed_alphabet_array) + $number_of_moves;
     			if($index > count($alphabet)) {
@@ -76,11 +96,13 @@ function cipher_form_submit($form, &$form_state) {
     		array_push($encoded_message, $letter);
     	}
     }
-    $encoded_message = implode($encoded_message);
-    $_SESSION['cipher_output'] = $encoded_message;
+    $output = implode($encoded_message);
+    $_SESSION['encoded_message'] = $output;
     $form_state['redirect'] = 'cipher_success_page';
 }
+
+// Take user to success page and return something
 function cipher_success() {
-    $output = $_SESSION['$encpded_message'];
+    $output = $_SESSION['encoded_message'];
     return "Your encoded message is: <b>$output</b>";
 }
