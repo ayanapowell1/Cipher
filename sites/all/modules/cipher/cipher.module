@@ -76,7 +76,7 @@ function cipher_form_submit($form, &$form_state) {
     	if (in_array($letter, $alphabet)) {
     		if ($direction == "right") {
     			$index = array_search($letter, $alphabet) + $number_of_moves;
-    			if($index > count($alphabet)) {
+    			if($index >= count($alphabet)) {
     				$index = $index % count($alphabet);
     				array_push($encoded_message, $alphabet[$index]);
     			} else {
@@ -85,7 +85,7 @@ function cipher_form_submit($form, &$form_state) {
     		} elseif ($direction == "left") {
     			$reversed_alphabet_array = array_reverse($alphabet);
     			$index = array_search($letter, $reversed_alphabet_array) + $number_of_moves;
-    			if($index > count($alphabet)) {
+    			if($index >= count($alphabet)) {
     				$index = $index % count($alphabet);
     				array_push($encoded_message, $reversed_alphabet_array[$index]);
     			} else {
